@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    restart: unless-stopped
+    command: hermes gateway run
+    volumes:
+      - hermes-data:/opt/data
+    ports:
+      - "8081:8080"
+    environment:
+      - TZ=Africa/Lagos
+
+volumes:
+  hermes-data:

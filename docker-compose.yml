@@ -6,7 +6,8 @@ services:
     container_name: hermes-gateway
     user: "root"
     restart: unless-stopped
-    command: gateway run
+    command: >
+      sh -lc ' mkdir -p /opt/data && (chown -R 0:0 /opt/data || true) && (chmod 755 /opt/data || true) && (test -e /opt/data/.env && chown 0:0 /opt/data/.env || true) && (test -e /opt/data/.env && chmod 644 /opt/data/.env || true) && exec gateway run '
     volumes:
       - hermes-data:/opt/data
     environment:

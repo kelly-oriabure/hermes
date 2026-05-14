@@ -10,6 +10,7 @@ services:
       - hermes-data:/opt/data
     environment:
       - TZ=Africa/Lagos
+      - PATH=/opt/hermes/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 volumes:
   hermes-data:

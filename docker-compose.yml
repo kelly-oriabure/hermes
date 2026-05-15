@@ -23,7 +23,6 @@
 #
 services:
   gateway:
-    build: .
     image: nousresearch/hermes-agent:2026.5.7
     container_name: hermes
     restart: unless-stopped
@@ -56,7 +55,7 @@ services:
     command: [ "gateway", "run" ]
 
   dashboard:
-    image: hermes-agent
+    image: nousresearch/hermes-agent:2026.5.7
     container_name: hermes-dashboard
     restart: unless-stopped
     network_mode: host

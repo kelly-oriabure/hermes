@@ -1,11 +1,22 @@
 services:
-  gateway:
+  init-permissions:
+    image: busybox
+    container_name: hermes-init
+    volumes:
+      - hermes_data:/opt/data
+    command: chown -R 10000:10000 /opt/data
+    restart: "no"
+
+  hermes:
     image: nousresearch/hermes-agent:latest
     container_name: hermes
     restart: unless-stopped
     network_mode: host
+    depends_on:
+      init-permissions:
+        condition: service_completed_successfully
     volumes:
-      - ~/.hermes:/opt/data
+      - hermes_data:/opt/data
     environment:
       - HERMES_UID=${HERMES_UID:-10000}
       - HERMES_GID=${HERMES_GID:-10000}
@@ -14,17 +25,12 @@ services:
       # - API_SERVER_HOST=0.0.0.0
       # - API_SERVER_KEY=${API_SERVER_KEY}
       # Microsoft Teams — uncomment and fill in to enable Teams gateway.
-      # Register your bot at https://dev.botframework.com/ to get these values.
       # - TEAMS_CLIENT_ID=${TEAMS_CLIENT_ID}
       # - TEAMS_CLIENT_SECRET=${TEAMS_CLIENT_SECRET}
       # - TEAMS_TENANT_ID=${TEAMS_TENANT_ID}
       # - TEAMS_ALLOWED_USERS=${TEAMS_ALLOWED_USERS}
       # - TEAMS_PORT=${TEAMS_PORT:-3978}
       # Google Chat — uncomment and fill in to enable the Google Chat gateway.
-      # See website/docs/user-guide/messaging/google_chat.md for the full setup.
-      # The SA JSON path must point to a file mounted into the container —
-      # add a volume entry above (e.g. ``- ~/.hermes/google-chat-sa.json:/secrets/google-chat-sa.json:ro``)
-      # then set GOOGLE_CHAT_SERVICE_ACCOUNT_JSON to that mount path.
       # - GOOGLE_CHAT_PROJECT_ID=${GOOGLE_CHAT_PROJECT_ID}
       # - GOOGLE_CHAT_SUBSCRIPTION_NAME=${GOOGLE_CHAT_SUBSCRIPTION_NAME}
       # - GOOGLE_CHAT_SERVICE_ACCOUNT_JSON=${GOOGLE_CHAT_SERVICE_ACCOUNT_JSON}
@@ -37,11 +43,17 @@ services:
     restart: unless-stopped
     network_mode: host
     depends_on:
-      - gateway
+      init-permissions:
+        condition: service_completed_successfully
+      hermes:
+        condition: service_started
     volumes:
-      - ~/.hermes:/opt/data
+      - hermes_data:/opt/data
     environment:
       - HERMES_UID=${HERMES_UID:-10000}
       - HERMES_GID=${HERMES_GID:-10000}
-    # Localhost-only. For remote access, tunnel via `ssh -L 9119:localhost:9119`.
     command: [ "dashboard", "--host", "127.0.0.1", "--no-open" ]
+
+volumes:
+  hermes_data:
+    driver: local
